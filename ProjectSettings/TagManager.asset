@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Civilian
+  - PublicPlace
   layers:
   - Default
   - TransparentFX
@@ -13,7 +15,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - Civilian
   - 
   - 
   - 
@@ -40,4 +42,16 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 4046131545
+    locked: 0
+  - name: Mark
+    uniqueID: 3307154151
+    locked: 0
+  - name: Unit
+    uniqueID: 1826952353
+    locked: 0
+  - name: UI
+    uniqueID: 287586529
     locked: 0
