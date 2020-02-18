@@ -46,6 +46,8 @@ public class WorldTimeManager : MonoBehaviour
 
         ContactsMarker.instance.Reset();
         ReflashPublicPlances();
+
+        GameObject.Find("PlayerController").SendMessage("ReflashActionPoint");
         GameObject.Find("PlayerController").SendMessage("DisableTempCheckers");
 
     }

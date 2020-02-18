@@ -18,6 +18,6 @@ public class CivilianSpriteManagaer : MonoBehaviour
 
     public Sprite GetSprtie_Normal() { return sprite_Normal; }
 
-    public Color GetSpriteNormal() { return Color.blue; }
+    public Color GetSpriteNormal() { return Color.white; }
     public Color GetSpriteInfect(){return Color.black;}
 }

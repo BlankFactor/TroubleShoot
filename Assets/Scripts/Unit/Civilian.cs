@@ -23,7 +23,7 @@ public class Civilian : MonoBehaviour
     [Header("移动状态")]
     public bool moveable = true;
     public bool moveAhead = true;
-    public bool loop = false;
+    private bool loop = false;
 
     [Space]
     public bool moving = false;
@@ -60,14 +60,13 @@ public class Civilian : MonoBehaviour
     public List<GameObject> contacts = new List<GameObject>();
     public List<GameObject> beContacts = new List<GameObject>();
     public GameObject edge;
+    public SpriteRenderer spriteRender;
     private TextMeshPro text_Temper;
 
     private void Start()
     {
         text_Temper = GetComponentInChildren<TextMeshPro>();
         text_Temper.gameObject.SetActive(false);
-
-        path.hideFlags = HideFlags.HideInInspector;
         Initialize();
     }
 
@@ -105,15 +104,18 @@ public class Civilian : MonoBehaviour
 
         if (infected)
         {
-            GetComponent<SpriteRenderer>().color = CivilianSpriteManagaer.instance.GetSpriteInfect();
+            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteInfect();
             WorldTimeManager.instance.AddInfectedCivilian(this);
             temperature = Random.Range(38f, 42f);
-            day_Coma = Random.Range(1, 15);
+            day_Coma = 14;
+
+            GameManager.instance.AddInfecter();
         }
         else {
-            GetComponent<SpriteRenderer>().color = CivilianSpriteManagaer.instance.GetSpriteNormal();
-
+            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteNormal();
         }
+
+        GameManager.instance.AddCivilian();
 
         // 记录目前位置
         GameManager.instance.RecoredPosition(this, transform.position);
@@ -217,6 +219,9 @@ public class Civilian : MonoBehaviour
             nodes.Add(simpleNodes[simpleNodes.Count - 1]);
 
         loop = nodes[0].Equals(nodes[nodes.Count - 1]) ? true : false;
+
+        Destroy(path);
+        simpleNodes.Clear();
     }
 
     /// <summary>
@@ -380,6 +385,8 @@ public class Civilian : MonoBehaviour
     public void SendToHosipital() {
         RemoveThisFromOtherContacts();
         RemoveThisFromOtherBeContacts();
+
+        GameManager.instance.RemoveInfecter();
         Destroy(gameObject);
     }
 
@@ -430,6 +437,11 @@ public class Civilian : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 被感染者感染
+    /// </summary>
+    /// <param name="_proba_Infect">感染概率</param>
     public void BeInfected(float _proba_Infect) {
         if (infected) return;
 
@@ -438,7 +450,7 @@ public class Civilian : MonoBehaviour
         // 概率感染
         if (Random.Range(0, 100) < threadhold) {
             infected = true;
-            GetComponent<SpriteRenderer>().color = CivilianSpriteManagaer.instance.GetSpriteInfect();
+            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteInfect();
             WorldTimeManager.instance.AddInfectedCivilian(this);
             day_Coma = Random.Range(1,15);
 
@@ -447,6 +459,9 @@ public class Civilian : MonoBehaviour
             if (text_Temper.gameObject.activeSelf) {
                 DisplayTemperature();
             }
+
+            // 登记感染名单
+            GameManager.instance.AddInfecter();
 
         }
     }
@@ -489,6 +504,10 @@ public class Civilian : MonoBehaviour
     // 设置描边
     public void SetExpand(bool _v) {
         edge.SetActive(_v);
+
+        if (_v) {
+            edge.GetComponent<SpriteRenderer>().sprite = spriteRender.sprite;
+        }
     }
 
     private void OnDrawGizmosSelected()

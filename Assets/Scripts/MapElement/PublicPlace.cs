@@ -112,6 +112,15 @@ public class PublicPlace : MonoBehaviour
                 }
             }
         }
+        else {
+            if (collision.tag.Equals("Civilian"))
+            {
+                if (!collision.GetComponent<Civilian>().Get_Infected())
+                {
+                    collision.GetComponent<Civilian>().BeInfected(probability_Infect);
+                }
+            }
+        }
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
@@ -125,10 +134,20 @@ public class PublicPlace : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            if (collision.tag.Equals("Civilian"))
+            {
+                if (!collision.GetComponent<Civilian>().Get_Infected())
+                {
+                    collision.GetComponent<Civilian>().BeInfected(probability_Infect);
+                }
+            }
+        }
     }
 
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.color = infected ? new Color(1,0,0,0.5f) : new Color(0,1,0,0.5f);
         Gizmos.DrawCube(transform.position + new Vector3(offset.x, offset.y), new Vector3(width, height));

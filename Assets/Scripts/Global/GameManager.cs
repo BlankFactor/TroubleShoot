@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,13 @@ public class GameManager : MonoBehaviour
 
     [Header("游戏状态")]
     public bool gameStart;
+    public bool gameEnd;
+
+    [Space]
+    public int count_Civilian;
+    public int count_Infecter;
+
+    [Space]
     public bool round_Player = true;
     public bool round_Civilian;
     public bool inCorountine;
@@ -24,24 +32,35 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
-    }
 
-    void Start()
-    {
-       
+        // 检测游戏是否初次启动 仅打包exe时去掉注释
+        // CheckApplicationFirstStart();
     }
 
     void Update()
     {
+        if (!gameStart) return;
+
         // 居民移动
         if (round_Civilian && !inCorountine) {
             StartCoroutine(ExecuteMoveCommand());
             WorldTimeManager.instance.FinishedRound();
+
+            // 会结束检测感染数
+            if (count_Infecter.Equals(count_Civilian))
+            {
+                Failed();
+            }
+            else if (count_Infecter.Equals(0))
+            {
+                Victory();
+            }
         }
     }
 
     public void TurnToRound_Civilian() {
         round_Civilian = true;
+        round_Player = false;
     }
 
     /// <summary>
@@ -133,6 +152,52 @@ public class GameManager : MonoBehaviour
         movementApplication.Enqueue(new KeyValuePair<Civilian, Vector2>(_c, _pos));
     }
 
+    public void AddInfecter() {
+        count_Infecter++;
+    }
+    public void RemoveInfecter() {
+        count_Infecter--;
+        count_Civilian--;
+
+       if (count_Infecter.Equals(0))
+        {
+            Victory();
+        }
+    }
+    public void AddCivilian() {
+        count_Civilian++;
+    }
+
+    /// <summary>
+    /// 游戏胜利
+    /// </summary>
+    private void Victory() {
+        EndGame();
+        Debug.Log("游戏胜利");
+    }
+
+    /// <summary>
+    /// 游戏失败
+    /// </summary>
+    private void Failed() {
+        EndGame();
+        Debug.Log("游戏结束");
+
+    }
+
+    public void StartGame() {
+        gameStart = true;
+
+        UIManager.instance.DisplayPanel_APRecorder();
+        UIManager.instance.DisplayPanel_Command();
+    }
+    public void EndGame() {
+        gameStart = false;
+        gameEnd = true;
+
+        round_Player = round_Civilian = false;
+    }
+
     /// <summary>
     /// 重新记录居民位置
     /// </summary>
@@ -146,5 +211,24 @@ public class GameManager : MonoBehaviour
         else {
             positionList[_c] = _pos;
         }
+    }
+
+    /// <summary>
+    /// 检测程序是否初次启动
+    /// </summary>
+    public void CheckApplicationFirstStart() {
+        if (PlayerPrefs.GetInt("AppFirstStart") == 0) {
+            PlayerPrefs.SetInt("AppFirstStart", 1);
+        }
+    }
+
+    public void RestartGame() {
+        if(gameEnd)
+            SceneManager.LoadScene(0);
+    }
+
+    public void OnApplicationQuit()
+    {
+        PlayerPrefs.SetInt("AppFirstStart", 0);
     }
 }

@@ -44,17 +44,20 @@ public class PlayerController : MonoBehaviour
     {
         cam = Camera.main;
         remain_AP = count_AP_PerRound;
+        ReflashActionPoint();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!GameManager.instance.gameStart) return;
+
         // 点数为 0 下一次点击操作为进入切换到npc移动回合
         if (remain_AP.Equals(0))
         {
             if (Input.GetMouseButtonDown(0))
             {
-                ReflashActionPoint();
+                TurnToRound();
             }
         }
         else
@@ -81,10 +84,12 @@ public class PlayerController : MonoBehaviour
         }
         else if (Input.GetMouseButtonDown(1)) {
             ResetCommand();
+            ReflashActionPoint();
         }
     }
 
     public void SetCommand_Disnifect() {
+        if (!GameManager.instance.round_Player) return;
         if (remain_AP - dec_Command_Disnifect < 0) return;
         ResetCommand();
 
@@ -93,6 +98,7 @@ public class PlayerController : MonoBehaviour
     }
     public void SetCommand_Troubleshoot()
     {
+        if (!GameManager.instance.round_Player) return;
         if (remain_AP - dec_Command_Troubleshoot < 0) return;
         ResetCommand();
 
@@ -100,6 +106,7 @@ public class PlayerController : MonoBehaviour
         selectedCommand = true;
     }
     public void SetCommand_Detect() {
+        if (!GameManager.instance.round_Player) return;
         if (remain_AP - dec_Command_Detect < 0) return;
         ResetCommand();
 
@@ -107,6 +114,7 @@ public class PlayerController : MonoBehaviour
         selectedCommand = true;
     }
     public void SetCommand_TemperMeasur() {
+        if (!GameManager.instance.round_Player) return;
         if (remain_AP - dec_Command_TemperMeasu < 0) return;
         ResetCommand();
 
@@ -134,9 +142,12 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
             case CommandType.Detect: {
-                    if (_hit.transform.tag.Equals("Civilian")) {
-                        if (_hit.transform.GetComponent<Civilian>().Get_Infected()) {
-                            _hit.transform.GetComponent<Civilian>().SendToHosipital(); 
+                    Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero,float.MaxValue,unitLayer);
+
+                    if (hit.transform.tag.Equals("Civilian")) {
+                        if (hit.transform.GetComponent<Civilian>().Get_Infected()) {
+                            hit.transform.GetComponent<Civilian>().SendToHosipital(); 
                         }
                         remain_AP -= dec_Command_Detect;
                     }
@@ -144,11 +155,14 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
             case CommandType.Troubleshoot: {
-                    if (_hit.transform.tag.Equals("Civilian"))
+                    Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, float.MaxValue, unitLayer);
+
+                    if (hit.transform.tag.Equals("Civilian"))
                     {
-                        if (_hit.transform.GetComponent<Civilian>().Get_Infected())
+                        if (hit.transform.GetComponent<Civilian>().Get_Infected())
                         {
-                            _hit.transform.GetComponent<Civilian>().ShowContacts();
+                            hit.transform.GetComponent<Civilian>().ShowContacts();
                             remain_AP -= dec_Command_Troubleshoot;
                         }
                     }
@@ -164,7 +178,7 @@ public class PlayerController : MonoBehaviour
             default:break;
         }
 
-        //ReflashActionPoint();
+        ReflashActionPoint();
         ResetCommand();
     }
 
@@ -216,11 +230,23 @@ public class PlayerController : MonoBehaviour
         return dis;
     }
 
+    // 刷新行动点
     public void ReflashActionPoint() {
-        if (remain_AP.Equals(0))
-        {
-            GameManager.instance.TurnToRound_Civilian();
-            remain_AP = count_AP_PerRound;
-        }
+        UIManager.instance.ReflashAPRecorder(remain_AP);
+        ReflashCommandPanel();
+    }
+
+    // 刷新命令按钮
+    public void ReflashCommandPanel() {
+        UIManager.instance.ReflashCommandPanel(remain_AP, dec_Command_Disnifect, dec_Command_Detect, dec_Command_Troubleshoot, dec_Command_TemperMeasu);
+    }
+
+    /// <summary>
+    /// 切换到下一回合
+    /// </summary>
+    public void TurnToRound() {
+        if (!GameManager.instance.round_Player) return;
+        GameManager.instance.TurnToRound_Civilian();
+        remain_AP = count_AP_PerRound;
     }
 }

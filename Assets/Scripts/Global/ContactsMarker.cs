@@ -23,7 +23,7 @@ public class ContactsMarker : MonoBehaviour
         originObject = _go;
         contacts = _contacts;
 
-        originObject.GetComponent<SpriteRenderer>().color = Color.red;
+        originObject.GetComponent<Civilian>().spriteRender.color = Color.red;
         foreach (var i in contacts) {
             i.GetComponent<Civilian>().SetExpand(true);
         }
@@ -33,7 +33,7 @@ public class ContactsMarker : MonoBehaviour
     {
         if (originObject == null) return;
 
-        originObject.GetComponent<SpriteRenderer>().color = Color.blue;
+        originObject.GetComponent<Civilian>().spriteRender.color = Color.white;
         foreach (var i in contacts) {
             i.GetComponent<Civilian>().SetExpand(false);
         }
