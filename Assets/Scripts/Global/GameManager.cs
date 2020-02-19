@@ -39,6 +39,16 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Victory();
+        }
+        else if (Input.GetKeyDown(KeyCode.W)) {
+            Failed();
+        }
+  
+
         if (!gameStart) return;
 
         // 居民移动
@@ -173,6 +183,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void Victory() {
         EndGame();
+        UIManager.instance.DisplayPanel_Endding(true);
         Debug.Log("游戏胜利");
     }
 
@@ -181,6 +192,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void Failed() {
         EndGame();
+        UIManager.instance.DisplayPanel_Endding(false);
         Debug.Log("游戏结束");
 
     }
@@ -194,6 +206,8 @@ public class GameManager : MonoBehaviour
     public void EndGame() {
         gameStart = false;
         gameEnd = true;
+
+        AudioManager.instance.Stop_BGM();
 
         round_Player = round_Civilian = false;
     }

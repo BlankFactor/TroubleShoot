@@ -95,6 +95,10 @@ public class PlayerController : MonoBehaviour
 
         cur_Command = CommandType.Disnifect;
         selectedCommand = true;
+
+        CursorManager.instance.SetCursor_Dist();
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
     public void SetCommand_Troubleshoot()
     {
@@ -104,6 +108,10 @@ public class PlayerController : MonoBehaviour
 
         cur_Command = CommandType.Troubleshoot;
         selectedCommand = true;
+
+        CursorManager.instance.SetCursor_Troubleshoot();
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
     public void SetCommand_Detect() {
         if (!GameManager.instance.round_Player) return;
@@ -112,6 +120,10 @@ public class PlayerController : MonoBehaviour
 
         cur_Command = CommandType.Detect;
         selectedCommand = true;
+
+        CursorManager.instance.SetCursor_Detect();
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
     public void SetCommand_TemperMeasur() {
         if (!GameManager.instance.round_Player) return;
@@ -123,6 +135,10 @@ public class PlayerController : MonoBehaviour
 
         temperatureChecker.SetActive(true);
         temperatureChecker.transform.localScale = new Vector2(range_TempChecker * 3 - 0.05f, range_TempChecker * 3 - 0.05f);
+
+        CursorManager.instance.SetCursor_Temper();
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
     public void ResetCommand() {
         cur_Command = CommandType.None;
@@ -130,22 +146,30 @@ public class PlayerController : MonoBehaviour
 
         // 关闭指令范围
         temperatureChecker.SetActive(false);
+
+        CursorManager.instance.SetCursor_Normal();
     }
     public void ExecuteCommand(RaycastHit2D _hit) {
         switch (cur_Command) {
             case CommandType.Disnifect:
                 {
-                    if (_hit.transform.tag.Equals("PublicPlace")) {
+                    if (_hit.transform.tag.Equals("PublicPlace"))
+                    {
                         _hit.transform.SendMessage("Disnifect");
                         remain_AP -= dec_Command_Disnifect;
+                        AudioManager.instance.PlaySE_Disnifect();
                     }
+                    else {
+                        AudioManager.instance.PlaySE_ClickButtonInvild();
+                    }
+
                     break;
                 }
             case CommandType.Detect: {
                     Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                     RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero,float.MaxValue,unitLayer);
 
-                    if (hit.transform.tag.Equals("Civilian")) {
+                    if (hit && hit.transform.tag.Equals("Civilian")) {
                         if (hit.transform.GetComponent<Civilian>().Get_Infected()) {
                             hit.transform.GetComponent<Civilian>().SendToHosipital(); 
                         }
@@ -158,13 +182,13 @@ public class PlayerController : MonoBehaviour
                     Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                     RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, float.MaxValue, unitLayer);
 
-                    if (hit.transform.tag.Equals("Civilian"))
+                    if (hit && hit.transform.tag.Equals("Civilian"))
                     {
-                        if (hit.transform.GetComponent<Civilian>().Get_Infected())
-                        {
+                        //if (hit.transform.GetComponent<Civilian>().Get_Infected())
+                        //{
                             hit.transform.GetComponent<Civilian>().ShowContacts();
                             remain_AP -= dec_Command_Troubleshoot;
-                        }
+                       // }
                     }
                     break;
                 }

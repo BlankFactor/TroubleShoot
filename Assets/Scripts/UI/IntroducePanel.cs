@@ -36,12 +36,14 @@ public class IntroducePanel : MonoBehaviour
     }
 
     public void StartGame() {
+        AudioManager.instance.Play_BGM();
         GameManager.instance.StartGame();
         Destroy(gameObject);
     }
 
     public void DisplayIntroduce() {
         StartCoroutine(introduceShowder());
+        AudioManager.instance.Play_Typer();
     }
     public void DisplayTip() {
         StartCoroutine(tipShowder()) ;
@@ -64,6 +66,7 @@ public class IntroducePanel : MonoBehaviour
 
             yield return new WaitForSeconds(duration);
         }
+        AudioManager.instance.Stop_Typer();
     }
 
     public void DisableBegningPanel() {

@@ -14,6 +14,8 @@ public class UIManager : MonoBehaviour
     public GameObject panel_APRecorder;
     public GameObject panel_Begning;
     public GameObject panel_Introduce;
+    public GameObject panel_Ending;
+    public GameObject panel_Tutorial;
 
     [Header("按钮对象")]
     public Button button_Disni;
@@ -23,6 +25,7 @@ public class UIManager : MonoBehaviour
 
     [Space]
     public Button button_Start;
+    public Button button_Tutorial;
     public Button button_Exit;
 
     [Header("文本对象")]
@@ -60,6 +63,13 @@ public class UIManager : MonoBehaviour
         text_APRecorder.color = Color.black;
     }
 
+    public void DisplayPanel_Tutorial() {
+        panel_Tutorial.SetActive(true);
+    }
+    public void DisablePanel_Tutorial() {
+        panel_Tutorial.SetActive(false);
+    }
+
     /// <summary>
     /// 进入主游戏
     /// </summary>
@@ -67,6 +77,9 @@ public class UIManager : MonoBehaviour
         panel_Introduce.SetActive(true);
         button_Start.GetComponent<Animator>().enabled = true;
         button_Exit.GetComponent<Animator>().enabled = true;
+        button_Tutorial.GetComponent<Animator>().enabled = true;
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
 
     /// <summary>
@@ -76,6 +89,8 @@ public class UIManager : MonoBehaviour
         button_Start.GetComponent<Animator>().enabled = true;
         button_Exit.GetComponent<Animator>().enabled = true;
         Application.Quit();
+
+        AudioManager.instance.PlaySE_ClickButton();
     }
 
     public void CheckFirstStartGame()
@@ -86,6 +101,10 @@ public class UIManager : MonoBehaviour
             panel_Begning.SetActive(false);
             GameManager.instance.StartGame();
         }
+    }
+
+    public void DisplayPanel_Endding(bool _victory) {
+        panel_Ending.GetComponent<EnddingPanel>().Display(_victory);
     }
 
     public void ReflashCommandPanel(int _ap,int _dis,int _det,int _trouble,int _temper) {

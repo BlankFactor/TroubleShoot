@@ -67,6 +67,7 @@ public class Civilian : MonoBehaviour
     {
         text_Temper = GetComponentInChildren<TextMeshPro>();
         text_Temper.gameObject.SetActive(false);
+
         Initialize();
     }
 
@@ -75,7 +76,7 @@ public class Civilian : MonoBehaviour
         Moving();
     }
 
-    void Initialize() {
+    public void Initialize() {
         origin = AmendPos(transform.position);
 
         temperature = Random.Range(36f, 37f);
@@ -96,27 +97,31 @@ public class Civilian : MonoBehaviour
 
         // 传染状态初始化
         if (masking)
+        {
             WearMask();
+            spriteRender.sprite = CivilianSpriteManagaer.instance.GetSprtie_Masking();
+        }
         if (cough)
+        {
             AddProbability_Infect(increase_Cough);
+            spriteRender.sprite = CivilianSpriteManagaer.instance.GetSprtie_Cough();
+        }
         if (heat)
+        {
             AddProbability_Infect(increase_Heat);
-
+            spriteRender.sprite = CivilianSpriteManagaer.instance.GetSprtie_Heat();
+            temperature = Random.Range(38f, 42f);
+        }
         if (infected)
         {
-            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteInfect();
             WorldTimeManager.instance.AddInfectedCivilian(this);
             temperature = Random.Range(38f, 42f);
             day_Coma = 14;
 
             GameManager.instance.AddInfecter();
         }
-        else {
-            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteNormal();
-        }
 
         GameManager.instance.AddCivilian();
-
         // 记录目前位置
         GameManager.instance.RecoredPosition(this, transform.position);
     }
@@ -149,6 +154,8 @@ public class Civilian : MonoBehaviour
         if (day_Coma == 0)
         {
             moveable = false;
+
+            spriteRender.gameObject.GetComponent<Animator>().SetBool("Coma", true);
         }
     }
     public int GetDay_Coma() { return day_Coma; }
@@ -221,7 +228,6 @@ public class Civilian : MonoBehaviour
         loop = nodes[0].Equals(nodes[nodes.Count - 1]) ? true : false;
 
         Destroy(path);
-        simpleNodes.Clear();
     }
 
     /// <summary>
@@ -450,9 +456,9 @@ public class Civilian : MonoBehaviour
         // 概率感染
         if (Random.Range(0, 100) < threadhold) {
             infected = true;
-            spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteInfect();
+            //spriteRender.color = CivilianSpriteManagaer.instance.GetSpriteInfect();
             WorldTimeManager.instance.AddInfectedCivilian(this);
-            day_Coma = Random.Range(1,15);
+            day_Coma = Random.Range(7,15);
 
             // 重设体温
             temperature = Random.Range(38f, 42f);
@@ -463,12 +469,18 @@ public class Civilian : MonoBehaviour
             // 登记感染名单
             GameManager.instance.AddInfecter();
 
+            // 播放声效
+            if (GameManager.instance.gameStart)
+                AudioManager.instance.PlaySE_Infect();
+
+            
         }
     }
 
     public void WearMask() {
         masking = true;
         AddProbaliblity_Immunity(increase_Masking);
+        AddProbability_Infect(-increase_Masking);
     }
 
     public void SetProbability_Infect(float _v) {
